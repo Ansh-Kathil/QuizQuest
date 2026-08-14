@@ -1,0 +1,4 @@
+@import "tailwindcss";
+.collapse {
+  visibility: visible !important;
+}
