@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function QuizSetup() {
     const [difficulty, setDifficulty] = useState("medium");
@@ -118,15 +119,15 @@ export default function QuizSetup() {
                     </div>
 
                     {/* Start */}
-                    <div className="mt-10 font-semibold text-lg! ">
+                    <div className="mt-10 w-full font-semibold text-lg! ">
 
-                    <button
-                        className="mt-12  border rounded-2xl! w-full py-4 
+                    <Link to={'/quiz'}
+                        className="mt-12 block text-center border rounded-2xl! no-underline! w-full! py-4 
                         bg-[#7C3AED] text-white text-lg font-bold
                         hover:bg-[#6D28D9] transition"
                         >
                         Start Quiz →
-                    </button>
+                    </Link>
                     </div>
 
                 </div>
