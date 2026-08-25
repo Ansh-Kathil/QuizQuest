@@ -1,13 +1,16 @@
-import Header from './components/Header'
-import { Landing } from './components/Landing'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import QuizSetupPage from './pages/QuizSetup'
 
 function App() {
-  return (
-    <>
-      <Header />
-      <Landing/>
-    </>
-  )
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/quiz-setup" element={<QuizSetupPage />} />
+            </Routes>
+        </BrowserRouter>
+    )
 }
 
 export default App
