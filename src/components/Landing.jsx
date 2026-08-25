@@ -1,5 +1,5 @@
 import React from 'react'
-
+import { Link } from "react-router-dom";
 export const Landing = () => {
     return (
         <div className='flex flex-col gap-8 m-8'>
@@ -12,7 +12,8 @@ export const Landing = () => {
                         Challenge yourself with thousands of mind-bending trivia questions across science, history, pop culture, geography, and more. Play solo or climb the global leaderboard!
                     </p>
                     <div className='flex gap-4 '>
-                        <button className="  font-semibold text-lg! border-2 px-8 w-fit py-2 rounded-2xl! bg-[#7C3AED]! text-white! border-[#7C3AED]!">Sign in</button>
+                        <Link
+    to="/quiz-setup" className="  font-semibold text-lg! border-2 px-8 w-fit py-2 rounded-2xl! bg-[#7C3AED]! text-white! border-[#7C3AED]! no-underline!">Start Game</Link>
                         <button className="  font-semibold text-lg! border-2 px-8 w-fit py-2 rounded-2xl! bg-white!  border-[#7C3AED]!">Leaderboard</button>
                     </div>
 
