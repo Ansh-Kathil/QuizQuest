@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 export default function QuizSetup() {
     const [difficulty, setDifficulty] = useState("medium");
     const [questions, setQuestions] = useState(10);
     const [category, setCategory] = useState("General Knowledge");
-    const [type ,settype] = useState("Multiple Choice");
+    const [type, settype] = useState("Multiple Choice");
+    const navigate = useNavigate()
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 px-6 py-14">
@@ -61,8 +65,8 @@ export default function QuizSetup() {
                                     key={level}
                                     onClick={() => setDifficulty(level)}
                                     className={` font-semibold text-lg! border-2 px-8  py-2 rounded-2xl!    capitalize transition ${difficulty === level
-                                            ? "bg-[#7C3AED] text-white border-[#7C3AED]"
-                                            : "bg-white border-gray-200 text-gray-700 hover:border-[#7C3AED] hover:text-[#7C3AED]"
+                                        ? "bg-[#7C3AED] text-white border-[#7C3AED]"
+                                        : "bg-white border-gray-200 text-gray-700 hover:border-[#7C3AED] hover:text-[#7C3AED]"
                                         }`}
                                 >
                                     {level}
@@ -85,8 +89,8 @@ export default function QuizSetup() {
                                     key={number}
                                     onClick={() => setQuestions(number)}
                                     className={`font-semibold text-lg! border-2 px-8  py-2 rounded-2xl!  transition ${questions === number
-                                            ? "bg-[#7C3AED] text-white border-[#7C3AED]"
-                                            : "bg-white border-gray-200 text-gray-700 hover:border-[#7C3AED] hover:text-[#7C3AED]"
+                                        ? "bg-[#7C3AED] text-white border-[#7C3AED]"
+                                        : "bg-white border-gray-200 text-gray-700 hover:border-[#7C3AED] hover:text-[#7C3AED]"
                                         }`}
                                 >
                                     {number}
@@ -95,20 +99,20 @@ export default function QuizSetup() {
 
                         </div>
                     </div>
-                    
+
                     <div className="mt-10">
                         <h2 className="text-2xl font-bold mb-4">
                             Question Type
                         </h2>
                         <div className="grid grid-cols-2 gap-5">
 
-                            {["Multiple Choice","True/false"].map((number) => (
+                            {["Multiple Choice", "True/false"].map((number) => (
                                 <button
                                     key={number}
                                     onClick={() => settype(number)}
                                     className={`font-semibold text-lg! border-2 px-8  py-2 rounded-2xl!  transition ${type === number
-                                            ? "bg-[#7C3AED] text-white border-[#7C3AED]"
-                                            : "bg-white border-gray-200 text-gray-700 hover:border-[#7C3AED] hover:text-[#7C3AED]"
+                                        ? "bg-[#7C3AED] text-white border-[#7C3AED]"
+                                        : "bg-white border-gray-200 text-gray-700 hover:border-[#7C3AED] hover:text-[#7C3AED]"
                                         }`}
                                 >
                                     {number}
@@ -121,13 +125,21 @@ export default function QuizSetup() {
                     {/* Start */}
                     <div className="mt-10 w-full font-semibold text-lg! ">
 
-                    <Link to={'/quiz'}
-                        className="mt-12 block text-center border rounded-2xl! no-underline! w-full! py-4 
+                        <button onClick={() => {
+                            navigate("/quiz", {
+                                state: {
+                                    category,
+                                    difficulty,
+                                    questions
+                                }
+                            })
+                        }}
+                            className="mt-12 block text-center border rounded-2xl! no-underline! w-full! py-4 
                         bg-[#7C3AED] text-white text-lg font-bold
                         hover:bg-[#6D28D9] transition"
                         >
-                        Start Quiz →
-                    </Link>
+                            Start Quiz →
+                        </button>
                     </div>
 
                 </div>

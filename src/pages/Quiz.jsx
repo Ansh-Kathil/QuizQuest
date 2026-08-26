@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate,useLocation } from "react-router-dom";
 import Header from "../components/Header";
 
 const questions = [
@@ -22,136 +22,163 @@ const questions = [
 
 export default function Quiz() {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const { category,difficulty,questions: questionCount} = location.state || {
+        category:  "General Knowledge",
+        difficulty: "medium",
+        questionCount: 10,
+    }
+
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [score, setScore] = useState(0);
+    const [time, setTime] = useState(0);
 
     const question = questions[currentQuestion];
+
     const handleNext = () => {
-        if (selectedAnswer === question.answer) {
-            setScore(score + 1);
-        }
+        const isCorrect = selectedAnswer === question.answer;
+        const newScore = isCorrect ? score + 1 : score;
+
         if (currentQuestion === questions.length - 1) {
             navigate("/results", {
                 state: {
-                    score: score,
-                    total: questions.length
+                    score: newScore,
+                    total: questions.length,
+                    time: formattedTime
                 }
             });
-            setSelectedAnswer(null);
             return;
         }
 
+        setScore(newScore);
         setCurrentQuestion(currentQuestion + 1);
+        setSelectedAnswer(null);
     };
 
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTime((prevtime) => prevtime + 1);
+        }, 1000);
 
+        return () => clearInterval(timer);
+    }, []);
 
+    const seconds = Math.round(time % 60);
+    const minutes = Math.round(time / 60);
+    const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+    
     return (
         <div>
-            <Header/>
-        
-        <div className="min-h-screen bg-gray-50 px-6 py-14">
+            <Header />
 
-            <div className="max-w-4xl mx-auto">
+            <div className="min-h-screen bg-gray-50 px-6 py-14">
 
-                {/* Top information */}
-                <div className="flex justify-between items-center mb-8">
+                <div className="max-w-4xl mx-auto">
 
-                    <p className="font-semibold text-gray-600">
-                        Question {currentQuestion + 1} of {questions.length}
-                    </p>
+                    {/* Top information */}
+                    <div className="flex justify-between items-center mb-8">
 
-                    <p className="font-bold text-[#7C3AED]">
-                        Score: {score}
-                    </p>
+                        <p className="font-semibold text-gray-600">
+                            Question {currentQuestion + 1} of {questions.length}
+                        </p>
+                        <div className="flex items-center gap-6">
+                            <p className="font-bold text-gray-600">
+                                Time: {formattedTime}
+                            </p>
+                            <p className="font-bold text-[#7C3AED]">
+                                Score: {score}
+                            </p>
+                        </div>
 
-                </div>
-
-
-                {/* Progress */}
-                <div className="w-full h-2 bg-gray-200 rounded-full mb-12">
-                    <div
-                        className="h-2 bg-[#7C3AED] rounded-full"
-                        style={{
-                            width: `${((currentQuestion + 1) / questions.length) * 100}%`
-                        }}
-                    />
-                </div>
+                    </div>
 
 
-                {/* Question */}
-                <div className="text-center">
+                    {/* Progress */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full mb-12">
+                        <div
+                            className="h-2 bg-[#7C3AED] rounded-full"
+                            style={{
+                                width: `${((currentQuestion + 1) / questions.length) * 100}%`
+                            }}
+                        />
+                    </div>
 
 
-                    <h1 className="text-4xl font-bold leading-tight">
-                        {question.question}
-                    </h1>
-
-                </div>
+                    {/* Question */}
+                    <div className="text-center">
 
 
-                {/* Answers */}
-                <div className="grid grid-cols-2 gap-5 mt-12">
+                        <h1 className="text-4xl font-bold leading-tight">
+                            {question.question}
+                        </h1>
 
-                    {question.options.map((option, index) => (
+                    </div>
 
-                        <button
-                            key={option}
-                            onClick={() => setSelectedAnswer(option)}
-                            className={`text-left p-6 rounded-2xl! border-2 bg-white transition ${selectedAnswer === option
-                                ? "border-[#7C3AED] bg-purple-50"
-                                : "border-gray-200 hover:border-[#7C3AED]"
-                                }`}
-                        >
 
-                            <div className="flex items-center gap-4">
+                    {/* Answers */}
+                    <div className="grid grid-cols-2 gap-5 mt-12">
 
-                                <div
-                                    className={`w-10 h-10 rounded-xl! flex items-center justify-center font-bold ${selectedAnswer === option
-                                        ? "bg-[#7C3AED] text-white"
-                                        : "bg-gray-100 text-gray-600"
-                                        }`}
-                                >
-                                    {String.fromCharCode(65 + index)}
+                        {question.options.map((option, index) => (
+
+                            <button
+                                key={option}
+                                onClick={() => setSelectedAnswer(option)}
+                                className={`text-left p-6 rounded-2xl! border-2 bg-white transition ${selectedAnswer === option
+                                    ? "border-[#7C3AED] bg-purple-50"
+                                    : "border-gray-200 hover:border-[#7C3AED]"
+                                    }`}
+                            >
+
+                                <div className="flex items-center gap-4">
+
+                                    <div
+                                        className={`w-10 h-10 rounded-xl! flex items-center justify-center font-bold ${selectedAnswer === option
+                                            ? "bg-[#7C3AED] text-white"
+                                            : "bg-gray-100 text-gray-600"
+                                            }`}
+                                    >
+                                        {String.fromCharCode(65 + index)}
+                                    </div>
+
+                                    <span className="font-semibold text-lg">
+                                        {option}
+                                    </span>
+
                                 </div>
 
-                                <span className="font-semibold text-lg">
-                                    {option}
-                                </span>
+                            </button>
 
-                            </div>
+                        ))}
 
-                        </button>
-
-                    ))}
-
-                </div>
+                    </div>
 
 
-                {/* Next */}
+                    {/* Next */}
 
-                <div className="flex justify-end mt-10">
+                    <div className="flex justify-end mt-10">
 
-                   
 
-                    <button
-                        disabled={!selectedAnswer}
-                        onClick={handleNext}
-                        className="font-semibold text-lg! border-2 px-8 py-3 rounded-2xl! bg-[#7C3AED]! text-white! border-[#7C3AED]! no-underline! 
+
+                        <button
+                            disabled={!selectedAnswer}
+                            onClick={handleNext}
+                            className="font-semibold text-lg! border-2 px-8 py-3 rounded-2xl! bg-[#7C3AED]! text-white! border-[#7C3AED]! no-underline! 
                         disabled:opacity-40 disabled:cursor-not-allowed
                         hover:bg-[#6D28D9] transition"
-                    >
-                        Next →
-                    </button>
+                        >
+                            Next →
+                        </button>
+
+                    </div>
+
+
 
                 </div>
 
-
-
             </div>
-
-        </div>
         </div>
     );
 }
