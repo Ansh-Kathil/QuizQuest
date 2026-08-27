@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+
 import {useNavigate} from "react-router-dom";
 
 export default function QuizSetup() {
     const [difficulty, setDifficulty] = useState("medium");
     const [questions, setQuestions] = useState(10);
     const [category, setCategory] = useState("General Knowledge");
-    const [type, settype] = useState("Multiple Choice");
+    const [type, setType] = useState("Multiple Choice");
     const navigate = useNavigate()
 
 
@@ -109,7 +109,7 @@ export default function QuizSetup() {
                             {["Multiple Choice", "True/false"].map((number) => (
                                 <button
                                     key={number}
-                                    onClick={() => settype(number)}
+                                    onClick={() => setType(number)}
                                     className={`font-semibold text-lg! border-2 px-8  py-2 rounded-2xl!  transition ${type === number
                                         ? "bg-[#7C3AED] text-white border-[#7C3AED]"
                                         : "bg-white border-gray-200 text-gray-700 hover:border-[#7C3AED] hover:text-[#7C3AED]"
@@ -130,7 +130,8 @@ export default function QuizSetup() {
                                 state: {
                                     category,
                                     difficulty,
-                                    questions
+                                    questions,
+                                    type
                                 }
                             })
                         }}

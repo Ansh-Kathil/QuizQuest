@@ -1,41 +1,58 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate,useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 
-const questions = [
-    {
-        question: "Which planet is known as the Red Planet?",
-        options: ["Earth", "Mars", "Jupiter", "Venus"],
-        answer: "Mars",
-    },
-    {
-        question: "What is the capital of France?",
-        options: ["London", "Berlin", "Paris", "Madrid"],
-        answer: "Paris",
-    },
-    {
-        question: "How many continents are there?",
-        options: ["5", "6", "7", "8"],
-        answer: "7",
-    },
-];
 
 export default function Quiz() {
     const navigate = useNavigate();
     const location = useLocation();
-
-    const { category,difficulty,questions: questionCount} = location.state || {
-        category:  "General Knowledge",
-        difficulty: "medium",
-        questionCount: 10,
-    }
+    const [questions, setQuestions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [score, setScore] = useState(0);
     const [time, setTime] = useState(0);
 
-    const question = questions[currentQuestion];
+    const seconds = Math.round(time % 60);
+    const minutes = Math.floor(time / 60);
+    const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+   const {
+    category,
+    difficulty,
+    questions: questionCount,
+    type
+} = location.state || {
+    category: "General Knowledge",
+    difficulty: "medium",
+    questions: 10,
+    type: "Multiple Choice"
+};
+
+    const questionType = type === "Multiple Choice"
+    ? "multiple"
+    : "boolean";
+
+    const categoryIds = {
+        "General Knowledge": 9,
+        "Science": 17,
+        "History": 23,
+        "Geography": 22,
+        "Sports": 21,
+        "Entertainment": 11,
+        "Technology": 18
+    };
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTime((prevtime) => prevtime + 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
 
     const handleNext = () => {
         const isCorrect = selectedAnswer === question.answer;
@@ -56,20 +73,96 @@ export default function Quiz() {
         setCurrentQuestion(currentQuestion + 1);
         setSelectedAnswer(null);
     };
+    const decodeHTML = (text) => {
+        const textarea = document.createElement("textarea");
+        textarea.innerHTML = text;
+        return textarea.value;
+    };
+
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setTime((prevtime) => prevtime + 1);
-        }, 1000);
+    const fetchQuestions = async () => {
+        try {
+            setLoading(true);
+            setError(null);
 
-        return () => clearInterval(timer);
-    }, []);
+            const url = `https://opentdb.com/api.php?amount=${questionCount}&category=${categoryIds[category]}&difficulty=${difficulty}&type=${questionType}`;
 
-    const seconds = Math.round(time % 60);
-    const minutes = Math.round(time / 60);
-    const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+            const response = await fetch(url);
 
-    
+            if (!response.ok) {
+                throw new Error("Failed to fetch questions");
+            }
+
+            const data = await response.json();
+
+            console.log(data);
+
+            if (data.response_code !== 0) {
+                throw new Error("No questions available");
+            }
+
+            const formattedQuestions = data.results.map((item) => ({
+                question: decodeHTML(item.question),
+                options: [
+                    decodeHTML(item.correct_answer),
+                    ...item.incorrect_answers.map(decodeHTML)
+                ].sort(() => Math.random() - 0.5),
+                answer: decodeHTML(item.correct_answer)
+            }));
+
+            setQuestions(formattedQuestions);
+
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchQuestions();
+}, [category, difficulty, questionCount, questionType]);
+
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-xl font-semibold">
+                    Loading questions...
+                </p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+                <p className="text-xl font-semibold text-red-500">
+                    {error}
+                </p>
+
+                <button
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-3 rounded-xl bg-[#7C3AED] text-white font-semibold"
+                >
+                    Try Again
+                </button>
+            </div>
+        );
+    }
+    if (!questions.length) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-xl font-semibold">
+                    No questions available.
+                </p>
+            </div>
+        );
+    }
+
+    const question = questions[currentQuestion];
+
+
     return (
         <div>
             <Header />
