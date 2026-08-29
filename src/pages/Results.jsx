@@ -6,16 +6,27 @@ export default function Results() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const { score, total, time } = location.state || {
-        score: 8,
-        total: 10,
-        time: "2:34",
-    };
+    const {
+    score,
+    total,
+    time,
+    category,
+    difficulty,
+    type
+} = location.state || {};
 
-    const percentage = total
-        ? Math.round((score / total) * 100)
-        : 0;
 
+if (!location.state) {
+    navigate("/quiz-setup");
+    return null;
+}
+    const percentage = Math.round((score / total) * 100);
+    const getMessage = () => {
+    if (percentage >= 80) return "Excellent!";
+    if (percentage >= 60) return "Great Job!";
+    if (percentage >= 40) return "Good Try!";
+    return "Keep Practicing!";
+};
     const incorrect = total - score;
 
     return (
@@ -121,7 +132,7 @@ export default function Results() {
                             className="px-6 py-2.5 rounded-2xl! bg-[#F5F3FF] text-[#7C3AED] text-xs font-semibold
                             hover:bg-purple-100 transition"
                         >
-                            Try Another Category
+                            Back to Home
                         </button>
 
                         <button

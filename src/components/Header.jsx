@@ -11,13 +11,13 @@ export default function Header() {
                     <div className=" absolute  left-1/2 -translate-x-1/2 ">
                         <ul   className=" flex  text-lg font-semibold items-center gap-10 list-none flex-row m-0 p-0">
                             <li className="">
-                                <Link to={'/'} className=" text-[#7C3AED]!  text-lg no-underline!"  href="#">Home</Link>
+                                <Link to={'/'} className=" text-[#7C3AED]!  text-lg no-underline!">Home</Link>
                             </li>
                             <li className="">
-                                <a className="text-black! no-underline!" href="#">Leaderboard</a>
+                                <Link to="/leaderboard" className="text-black! no-underline!" >Leaderboard</Link>
                             </li>
                              <li className="">
-                                <a className="text-black! no-underline!" href="#">About</a>
+                                <Link className="text-black! no-underline!" >About</Link>
                             </li>
                         </ul>
                     </div>

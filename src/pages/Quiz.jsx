@@ -14,26 +14,29 @@ export default function Quiz() {
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [score, setScore] = useState(0);
     const [time, setTime] = useState(0);
+    const [answered, setAnswered] = useState(false);
 
     const seconds = Math.round(time % 60);
     const minutes = Math.floor(time / 60);
     const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-   const {
+    const {
     category,
     difficulty,
     questions: questionCount,
-    type
+    type,
+    username
 } = location.state || {
     category: "General Knowledge",
     difficulty: "medium",
     questions: 10,
-    type: "Multiple Choice"
+    type: "Multiple Choice",
+    username: "Guest"
 };
 
     const questionType = type === "Multiple Choice"
-    ? "multiple"
-    : "boolean";
+        ? "multiple"
+        : "boolean";
 
     const categoryIds = {
         "General Knowledge": 9,
@@ -54,25 +57,55 @@ export default function Quiz() {
     }, []);
 
 
-    const handleNext = () => {
-        const isCorrect = selectedAnswer === question.answer;
-        const newScore = isCorrect ? score + 1 : score;
+  const handleNext = () => {
+    const isCorrect = selectedAnswer === question.answer;
+    const newScore = isCorrect ? score + 1 : score;
 
-        if (currentQuestion === questions.length - 1) {
-            navigate("/results", {
-                state: {
-                    score: newScore,
-                    total: questions.length,
-                    time: formattedTime
-                }
-            });
-            return;
-        }
+    if (currentQuestion === questions.length - 1) {
 
-        setScore(newScore);
-        setCurrentQuestion(currentQuestion + 1);
-        setSelectedAnswer(null);
-    };
+        const result = {
+            username,
+            score: newScore,
+            total: questions.length,
+            time: formattedTime,
+            category,
+            difficulty,
+            type,
+            date: new Date().toLocaleDateString()
+        };
+
+        const previousResults =
+            JSON.parse(localStorage.getItem("quizResults")) || [];
+
+        previousResults.push(result);
+
+        localStorage.setItem(
+            "quizResults",
+            JSON.stringify(previousResults)
+        );
+
+        navigate("/results", {
+            state: {
+                username,
+                score: newScore,
+                total: questions.length,
+                time: formattedTime,
+                category,
+                difficulty,
+                type
+            }
+        });
+
+        return;
+    }
+
+    setScore(newScore);
+    setCurrentQuestion(currentQuestion + 1);
+    setSelectedAnswer(null);
+    setAnswered(false);
+};
+
+
     const decodeHTML = (text) => {
         const textarea = document.createElement("textarea");
         textarea.innerHTML = text;
@@ -81,47 +114,47 @@ export default function Quiz() {
 
 
     useEffect(() => {
-    const fetchQuestions = async () => {
-        try {
-            setLoading(true);
-            setError(null);
+        const fetchQuestions = async () => {
+            try {
+                setLoading(true);
+                setError(null);
 
-            const url = `https://opentdb.com/api.php?amount=${questionCount}&category=${categoryIds[category]}&difficulty=${difficulty}&type=${questionType}`;
+                const url = `https://opentdb.com/api.php?amount=${questionCount}&category=${categoryIds[category]}&difficulty=${difficulty}&type=${questionType}`;
 
-            const response = await fetch(url);
+                const response = await fetch(url);
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch questions");
+                if (!response.ok) {
+                    throw new Error("Failed to fetch questions");
+                }
+
+                const data = await response.json();
+
+                console.log(data);
+
+                if (data.response_code !== 0) {
+                    throw new Error("No questions available");
+                }
+
+                const formattedQuestions = data.results.map((item) => ({
+                    question: decodeHTML(item.question),
+                    options: [
+                        decodeHTML(item.correct_answer),
+                        ...item.incorrect_answers.map(decodeHTML)
+                    ].sort(() => Math.random() - 0.5),
+                    answer: decodeHTML(item.correct_answer)
+                }));
+
+                setQuestions(formattedQuestions);
+
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
             }
+        };
 
-            const data = await response.json();
-
-            console.log(data);
-
-            if (data.response_code !== 0) {
-                throw new Error("No questions available");
-            }
-
-            const formattedQuestions = data.results.map((item) => ({
-                question: decodeHTML(item.question),
-                options: [
-                    decodeHTML(item.correct_answer),
-                    ...item.incorrect_answers.map(decodeHTML)
-                ].sort(() => Math.random() - 0.5),
-                answer: decodeHTML(item.correct_answer)
-            }));
-
-            setQuestions(formattedQuestions);
-
-        } catch (error) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    fetchQuestions();
-}, [category, difficulty, questionCount, questionType]);
+        fetchQuestions();
+    }, [category, difficulty, questionCount, questionType]);
 
 
     if (loading) {
@@ -165,7 +198,7 @@ export default function Quiz() {
 
     return (
         <div>
-            <Header />
+
 
             <div className="min-h-screen bg-gray-50 px-6 py-14">
 
@@ -218,10 +251,20 @@ export default function Quiz() {
 
                             <button
                                 key={option}
-                                onClick={() => setSelectedAnswer(option)}
-                                className={`text-left p-6 rounded-2xl! border-2 bg-white transition ${selectedAnswer === option
-                                    ? "border-[#7C3AED] bg-purple-50"
-                                    : "border-gray-200 hover:border-[#7C3AED]"
+                                onClick={() => {
+                                    if (!answered) {
+                                        setSelectedAnswer(option);
+                                        setAnswered(true);
+                                    }
+                                }}
+                                className={`text-left p-6 rounded-2xl! border-2 bg-white transition
+                                        ${selectedAnswer === option
+                                        ? option === question.answer
+                                            ? "border-green-500 bg-green-50"
+                                            : "border-red-500 bg-red-50"
+                                        : answered && option === question.answer
+                                            ? "border-green-500 bg-green-50"
+                                            : "border-gray-200 hover:border-[#7C3AED]"
                                     }`}
                             >
 
@@ -249,6 +292,18 @@ export default function Quiz() {
                     </div>
 
 
+                    <div
+                        className={` ${answered ? "" : "invisible"}  mt-6 p-4 rounded-xl font-semibold ${selectedAnswer === question.answer
+                            ? "bg-green-50 text-green-700"
+                            : "bg-red-50 text-red-700"
+                            }`}
+                    >
+                        {selectedAnswer === question.answer
+                            ? "✓ Correct!"
+                            : `✗ Incorrect — Correct answer: ${question.answer}`}
+                    </div>
+
+
                     {/* Next */}
 
                     <div className="flex justify-end mt-10">
@@ -262,7 +317,9 @@ export default function Quiz() {
                         disabled:opacity-40 disabled:cursor-not-allowed
                         hover:bg-[#6D28D9] transition"
                         >
-                            Next →
+                            {currentQuestion === questions.length - 1
+                                ? "Finish Quiz ✓"
+                                : "Next →"}
                         </button>
 
                     </div>

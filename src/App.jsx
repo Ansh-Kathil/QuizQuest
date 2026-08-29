@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import QuizSetupPage from './pages/QuizSetup'
 import Quiz from './pages/Quiz'
 import Results  from './pages/Results'
+import Leaderboard from './pages/LeaderBoard'
 
 function App() {
     return (
@@ -12,6 +13,7 @@ function App() {
                 <Route path="/quiz-setup" element={<QuizSetupPage />} />
                 <Route path="/quiz" element={<Quiz />} />
                 <Route path="/results" element={<Results />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
             </Routes>
         </BrowserRouter>
     )

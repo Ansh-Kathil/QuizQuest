@@ -8,6 +8,7 @@ export default function QuizSetup() {
     const [category, setCategory] = useState("General Knowledge");
     const [type, setType] = useState("Multiple Choice");
     const navigate = useNavigate()
+    const [username, setUsername] = useState("");
 
 
 
@@ -122,19 +123,39 @@ export default function QuizSetup() {
                         </div>
                     </div>
 
+                    <div className="mt-10">
+    <h2 className="text-2xl font-bold mb-4">
+        Your Name
+    </h2>
+
+    <input
+        type="text"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Enter your name"
+        className="w-full border border-gray-200 rounded-xl px-5 py-4
+        bg-white text-gray-700 outline-none
+        focus:border-[#7C3AED]"
+    />
+</div>
+
                     {/* Start */}
                     <div className="mt-10 w-full font-semibold text-lg! ">
 
-                        <button onClick={() => {
-                            navigate("/quiz", {
-                                state: {
-                                    category,
-                                    difficulty,
-                                    questions,
-                                    type
-                                }
-                            })
-                        }}
+                        <button disabled={!username.trim()} disabled:opacity-40 disabled:cursor-not-allowed onClick={() => {
+    localStorage.setItem("username", username);
+
+    navigate("/quiz", {
+        state: {
+            category,
+            difficulty,
+            questions,
+            type,
+            username
+        }
+    });
+}}
+                    
                             className="mt-12 block text-center border rounded-2xl! no-underline! w-full! py-4 
                         bg-[#7C3AED] text-white text-lg font-bold
                         hover:bg-[#6D28D9] transition"
